@@ -18,7 +18,7 @@ public class User {
 
   private String name;
 
-  private Date createdTime = new Date();
+  private Date createdTime;
 
-  private Date lastModTime = new Date();
+  private Date lastModTime;
 }

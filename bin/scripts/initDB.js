@@ -10,6 +10,7 @@ const productInventoryC = mongoDB.getCollection("product.inventory")
 
 let now = new Date();
 userC.insert({
+  _id: ObjectId("5c2b7097cfc4732a018fa5eb"),
   name: '测试用户',
   createdTime: now,
   lastModTime: now
