@@ -11,7 +11,7 @@ import lombok.Data;
  * User
  */
 @Data
-@Document(collection="user")
+@Document(collection = "user")
 public class User {
   @Id
   private String id;
