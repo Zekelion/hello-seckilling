@@ -1,0 +1,23 @@
+spring:
+  profiles:
+    active: development
+  data:
+    redis:
+      host: localhost
+      port: 6279
+    mongodb:
+      seckill:
+        host: localhost
+        port: 27017
+        database: seckill
+  kafka:
+    bootstrap-servers: localhost:9092
+    max-block-ms: 500
+    producer:
+      retries: 10
+    
+server:
+  port: 37000
+logging:
+  level:
+    com.github.eriksen.seckilling: DEBUG
