@@ -21,7 +21,7 @@ public class OrderDetail {
   @Indexed
   private ObjectId oId; // order _id
   
-  private Object productSnapshot; // product snapshot
+  private ProductInventory productSnapshot; // product snapshot
 
   private Date createdTime = new Date();
 

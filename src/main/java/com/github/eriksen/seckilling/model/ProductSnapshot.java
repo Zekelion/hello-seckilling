@@ -1,4 +1,4 @@
-package com.github.eriksen.seckilling.pojo;
+package com.github.eriksen.seckilling.model;
 
 import java.util.Date;
 
