@@ -3,6 +3,8 @@ package com.github.eriksen.seckilling.service.impl;
 import java.util.Optional;
 
 import com.github.eriksen.seckilling.model.Product;
+import com.github.eriksen.seckilling.peresistence.model.ProductCache;
+import com.github.eriksen.seckilling.peresistence.repository.ProductCacheRepo;
 import com.github.eriksen.seckilling.repository.seckill.ProductRepo;
 import com.github.eriksen.seckilling.service.ProductSvc;
 
@@ -17,13 +19,20 @@ import org.springframework.stereotype.Service;
  * ProductSvcImpl
  */
 @Service
-public class ProductSvcImpl implements ProductSvc{
+public class ProductSvcImpl implements ProductSvc {
 
   @Autowired
   private ProductRepo productRepo;
+  @Autowired
+  private ProductCacheRepo productCacheRepo;
 
   @Override
   public Optional<Product> getById(String id) {
+    Optional<ProductCache> cache = productCacheRepo.findById(id);
+    if (cache.isPresent()) {
+      return Optional.of(cache.get().getProduct());
+    }
+
     return productRepo.findById(id);
   }
 

@@ -33,6 +33,7 @@ dependencies {
 	}
 	implementation('org.springframework.kafka:spring-kafka')
 	implementation('org.springframework.boot:spring-boot-starter-jetty')
+	implementation('org.springframework.boot:spring-boot-starter-aop')
 	compile("com.alibaba:fastjson:1.2.54")
 	compileOnly('org.projectlombok:lombok')
 

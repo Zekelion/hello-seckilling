@@ -14,7 +14,7 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
  * RedisConf
  */
 @Configuration
-@EnableRedisRepositories(basePackages = "com.github.eriksen.seckilling.peresistence")
+@EnableRedisRepositories(basePackages = "com.github.eriksen.seckilling.peresistence.repository")
 public class RedisConf {
 
   @Value("${spring.data.redis.host}")
