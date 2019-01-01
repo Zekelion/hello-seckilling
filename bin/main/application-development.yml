@@ -17,7 +17,7 @@ spring:
       retries: 10
     
 server:
-  port: 37000
+  port: 47000
 logging:
   level:
     com.github.eriksen.seckilling: DEBUG

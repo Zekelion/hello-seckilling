@@ -30,3 +30,6 @@
 .settings
 .vscode
 *.class
+
+bin/main
+bin/test

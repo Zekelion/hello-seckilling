@@ -27,11 +27,13 @@ repositories {
 dependencies {
 	implementation('org.springframework.boot:spring-boot-starter-data-mongodb')
 	implementation('org.springframework.boot:spring-boot-starter-data-redis')
+	implementation('redis.clients:jedis')
 	implementation('org.springframework.boot:spring-boot-starter-web') {
 		exclude module: 'spring-boot-starter-tomcat'
 	}
 	implementation('org.springframework.kafka:spring-kafka')
 	implementation('org.springframework.boot:spring-boot-starter-jetty')
+	compile("com.alibaba:fastjson:1.2.54")
 	compileOnly('org.projectlombok:lombok')
 
 	testImplementation('org.springframework.boot:spring-boot-starter-test')
