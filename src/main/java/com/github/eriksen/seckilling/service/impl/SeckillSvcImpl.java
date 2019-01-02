@@ -6,12 +6,14 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import com.github.eriksen.seckilling.dto.ActivityInitBody;
+import com.github.eriksen.seckilling.messages.KafkaSender;
 import com.github.eriksen.seckilling.model.Activity;
 import com.github.eriksen.seckilling.model.Product;
 import com.github.eriksen.seckilling.repository.ActivityRepo;
 import com.github.eriksen.seckilling.service.ProductSvc;
 import com.github.eriksen.seckilling.service.SeckillSvc;
 import com.github.eriksen.seckilling.utils.CustomException;
+import com.github.eriksen.seckilling.utils.MQConst;
 
 import org.bson.types.ObjectId;
 import org.eclipse.jetty.http.HttpStatus;
@@ -31,6 +33,8 @@ public class SeckillSvcImpl implements SeckillSvc {
   private ActivityRepo activityRepo;
   @Resource
   private ProductSvc productSvc;
+  @Autowired
+  private KafkaSender kafkaSender;
 
   @Override
   public Activity createSeckillActivity(ActivityInitBody body) throws CustomException {
@@ -50,6 +54,11 @@ public class SeckillSvcImpl implements SeckillSvc {
     activity.setEndTime(body.getEndTime());
     activity.setProducts(prodList);
 
-    return activityRepo.save(activity);
+    Activity result =  activityRepo.save(activity);
+
+    // send activity info to mq
+    kafkaSender.sendToKafka(MQConst.SECKILL_ACTIVITY_TOPIC, result);
+
+    return result;
   }
 }
