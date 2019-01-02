@@ -5,7 +5,7 @@ import java.util.Optional;
 import com.github.eriksen.seckilling.model.Product;
 import com.github.eriksen.seckilling.peresistence.model.ProductCache;
 import com.github.eriksen.seckilling.peresistence.repository.ProductCacheRepo;
-import com.github.eriksen.seckilling.repository.seckill.ProductRepo;
+import com.github.eriksen.seckilling.repository.ProductRepo;
 import com.github.eriksen.seckilling.service.ProductSvc;
 
 import org.springframework.beans.factory.annotation.Autowired;

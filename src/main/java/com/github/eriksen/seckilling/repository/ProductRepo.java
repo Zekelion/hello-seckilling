@@ -1,4 +1,4 @@
-package com.github.eriksen.seckilling.repository.seckill;
+package com.github.eriksen.seckilling.repository;
 
 import com.github.eriksen.seckilling.model.Product;
 

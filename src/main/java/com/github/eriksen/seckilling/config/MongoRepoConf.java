@@ -16,7 +16,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
  * MongoRepoConf
  */
 @Configuration
-@EnableMongoRepositories(basePackages = "com.github.eriksen.seckilling.repository.seckill", mongoTemplateRef = "seckillDbTemp")
+@EnableMongoRepositories(basePackages = "com.github.eriksen.seckilling.repository", mongoTemplateRef = "seckillDbTemp")
 public class MongoRepoConf {
 
   @Bean("seckillConf")
