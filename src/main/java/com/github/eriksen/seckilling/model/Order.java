@@ -25,9 +25,11 @@ public class Order {
 
   private ObjectId uId; // order's owner
 
+  private ObjectId aId; // activity id
+
   private OrderStatus status;
 
-  @Indexed(direction=IndexDirection.DESCENDING)
+  @Indexed(direction = IndexDirection.DESCENDING)
   private Date createdTime = new Date();
 
   private Date lastModTime = new Date();
