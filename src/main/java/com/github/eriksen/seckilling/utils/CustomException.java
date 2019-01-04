@@ -19,5 +19,5 @@ public class CustomException extends RuntimeException {
 
   private int httpStatus;
 
-  private String reason;
+  private String message;
 }
