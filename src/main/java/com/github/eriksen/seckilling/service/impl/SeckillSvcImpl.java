@@ -105,7 +105,6 @@ public class SeckillSvcImpl implements SeckillSvc {
 
     List<ProductCache> productCaches = new ArrayList<>();
     for (Product product : products) {
-      log.debug("" + product);
       ProductCache prodCache = new ProductCache();
       prodCache.setId(product.getId());
       prodCache.setProduct(product);
@@ -120,6 +119,7 @@ public class SeckillSvcImpl implements SeckillSvc {
 
       prodCache.setInventory(inventories.get(product.getId().toString()));
 
+      log.debug("Cache product" + prodCache);
       productCaches.add(prodCache);
     }
 

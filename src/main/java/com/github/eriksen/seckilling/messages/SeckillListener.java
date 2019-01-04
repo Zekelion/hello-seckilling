@@ -21,7 +21,7 @@ public class SeckillListener {
   @Resource
   private SeckillSvc seckillSvc;
 
-  @KafkaListener(topics = MQConst.SECKILL_ACTIVITY_TOPIC)
+  @KafkaListener(topics = MQConst.SECKILL_ACTIVITY_TOPIC, groupId = MQConst.SECKILL_BROADCAST_CONSUMER_GROUP)
   public void onInit(Activity activity) {
     try {
       log.debug("[Msg] " + activity);
@@ -29,6 +29,7 @@ public class SeckillListener {
         log.debug("Activity preheated");
       }
     } catch (Exception e) {
+      log.error("[Error] failed to preheat, due to " + e.getMessage());
       e.printStackTrace();
     }
   }
