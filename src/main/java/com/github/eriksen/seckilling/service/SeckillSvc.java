@@ -10,4 +10,6 @@ import com.github.eriksen.seckilling.utils.CustomException;
 public interface SeckillSvc {
 
   Activity createSeckillActivity(ActivityInitBody body) throws CustomException;
+
+  boolean preheatSeckillActivity(Activity activity);
 }

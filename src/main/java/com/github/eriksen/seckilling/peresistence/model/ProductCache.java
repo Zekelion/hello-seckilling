@@ -19,4 +19,6 @@ public class ProductCache {
   private String id;
 
   private Product product;
+
+  private int inventory;
 }
