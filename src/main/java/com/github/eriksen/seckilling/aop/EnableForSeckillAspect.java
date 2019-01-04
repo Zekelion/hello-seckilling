@@ -15,6 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Optional;
 
 @Aspect
 @Component
@@ -24,12 +28,16 @@ public class EnableForSeckillAspect {
   @Autowired
   private ActivityCacheRepo activityCacheRepo;
 
+  private static final String PARAM_ID = "activityId";
+
+  public static ThreadLocal<ActivityCache> activityCacheThreadLocal = new ThreadLocal<>();
+
   @Pointcut("within(com.github.eriksen.seckilling.controller.*) && @annotation(com.github.eriksen.seckilling.annotations.EnableForSeckill)")
   public void enter() {
   }
 
   @Around("enter()")
-  public void aroundEnter(ProceedingJoinPoint pjp) throws RuntimeException {
+  public Object aroundEnter(ProceedingJoinPoint pjp) throws RuntimeException {
     try {
       MethodSignature methodSignature = (MethodSignature) pjp.getSignature();
       Method method = methodSignature.getMethod();
@@ -46,11 +54,42 @@ public class EnableForSeckillAspect {
         );
       }
 
+      Parameter[] methodParams = method.getParameters();
+      int argIndex = -1;
+      for (int i = 0; i < methodParams.length; i++) {
+        if (methodParams[i].getName().equals(PARAM_ID)) {
+          argIndex = i;
+          break;
+        }
+      }
 
-//      ActivityCache cache = activityCacheRepo.findById();
-//      pjp.getArgs();
+      if (argIndex < 0) {
+        throw new CustomException(
+            "E_SECKILL_ENABLE_064",
+            HttpStatus.NOT_ACCEPTABLE_406,
+            "请传入活动id"
+        );
+      }
 
-      pjp.proceed();
+      Object[] args = pjp.getArgs();
+      String activityId = (String) args[argIndex];
+      Optional<ActivityCache> cache = activityCacheRepo.findById(activityId);
+      log.debug("[Cache] " + cache);
+
+      LocalDateTime now = LocalDateTime.now();
+      if (!cache.isPresent()
+          || !now.isAfter(cache.get().getStartTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
+          || !now.isBefore(cache.get().getEndTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())) {
+        throw new CustomException(
+            "E_SECKILL_ENABLE_074",
+            HttpStatus.BAD_REQUEST_400,
+            "未在活动时间或活动未启用"
+        );
+      }
+
+      activityCacheThreadLocal.set(cache.get());
+
+      return pjp.proceed(args);
     } catch (Throwable e) {
       log.error("[Exit](error) " + e.getMessage());
       e.printStackTrace();

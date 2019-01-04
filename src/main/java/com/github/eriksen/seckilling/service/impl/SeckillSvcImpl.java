@@ -94,7 +94,7 @@ public class SeckillSvcImpl implements SeckillSvc {
   @Override
   public boolean preheatSeckillActivity(Activity activity) {
     ActivityCache activityCache = new ActivityCache();
-    activity.setId(activity.getId());
+    activityCache.setId(activity.getId());
     activityCache.setStartTime(activity.getStartTime());
     activityCache.setEndTime(activity.getEndTime());
 
