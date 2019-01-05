@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import javax.annotation.Resource;
 
+import com.github.eriksen.seckilling.annotations.RateLimit;
 import com.github.eriksen.seckilling.dto.CommonPage;
 import com.github.eriksen.seckilling.dto.ProductInventoryDto;
 import com.github.eriksen.seckilling.model.Product;
@@ -43,6 +44,7 @@ public class ProductController {
   }
 
   @GetMapping("/api/v1.0/product/inventory")
+  @RateLimit(limit = 2)
   public Optional<ProductInventoryDto> getProductInventory(@RequestParam("id") String id) {
     return Optional.of(productSvc.getProductInventory(new ObjectId(id)));
   }

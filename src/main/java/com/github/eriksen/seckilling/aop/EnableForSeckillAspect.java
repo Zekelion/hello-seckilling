@@ -92,7 +92,10 @@ public class EnableForSeckillAspect {
       return pjp.proceed(args);
     } catch (Throwable e) {
       log.error("[Exit](error) " + e.getMessage());
-      e.printStackTrace();
+      if (!(e instanceof CustomException)) {
+        e.printStackTrace();
+      }
+
       throw (RuntimeException) e;
     }
   }

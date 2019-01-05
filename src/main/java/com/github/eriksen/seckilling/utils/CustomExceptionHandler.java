@@ -25,7 +25,6 @@ public class CustomExceptionHandler {
   @ResponseBody
   public CommonException exception(HttpServletRequest request, HttpServletResponse response, CustomException e) {
     logger.error("[Error] " + request.getRequestURI() + " " + e.getMessage());
-    e.printStackTrace();
 
     CommonException resError = new CommonException();
     resError.setStatus(e.getHttpStatus());
