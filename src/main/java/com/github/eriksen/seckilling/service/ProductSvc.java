@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.github.eriksen.seckilling.dto.ProductInventoryDto;
 import com.github.eriksen.seckilling.model.Product;
 
 import org.bson.types.ObjectId;
@@ -35,4 +36,10 @@ public interface ProductSvc {
    * @return Map<String, Integer> K : Product id, V : inventory
    */
   Map<String, Integer> getProductsInventory(List<ObjectId> ids);
+
+  /**
+   * retrieve prod's inventory
+   * @return ProductInventoryDto
+   */
+  ProductInventoryDto getProductInventory(ObjectId id);
 }

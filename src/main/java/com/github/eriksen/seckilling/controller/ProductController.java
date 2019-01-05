@@ -5,9 +5,12 @@ import java.util.Optional;
 import javax.annotation.Resource;
 
 import com.github.eriksen.seckilling.dto.CommonPage;
+import com.github.eriksen.seckilling.dto.ProductInventoryDto;
 import com.github.eriksen.seckilling.model.Product;
+import com.github.eriksen.seckilling.model.ProductInventory;
 import com.github.eriksen.seckilling.service.ProductSvc;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -24,13 +27,8 @@ public class ProductController {
   private ProductSvc productSvc;
 
   @GetMapping("/api/v1.0/product/info")
-  public Product getProductDetail(@RequestParam(value = "id", required = true) String id) {
-    Optional<Product> product = productSvc.getById(id);
-    if (product.isPresent()) {
-      return product.get();
-    }
-
-    return null;
+  public Optional<Product> getProductDetail(@RequestParam(value = "id", required = true) String id) {
+    return productSvc.getById(id);
   }
 
   @GetMapping("/api/v1.0/product/list")
@@ -41,8 +39,11 @@ public class ProductController {
     Sort sort = new Sort(Direction.DESC, "createdTime");
     Page<Product> page = productSvc.getPage(_skip, _limit, sort);
 
-    CommonPage<Product> result = new CommonPage<Product>(page.getContent(), page.getTotalElements(), _skip, _limit);
+    return new CommonPage<Product>(page.getContent(), page.getTotalElements(), _skip, _limit);
+  }
 
-    return result;
+  @GetMapping("/api/v1.0/product/inventory")
+  public Optional<ProductInventoryDto> getProductInventory(@RequestParam("id") String id) {
+    return Optional.of(productSvc.getProductInventory(new ObjectId(id)));
   }
 }

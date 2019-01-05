@@ -1,10 +1,8 @@
 package com.github.eriksen.seckilling.service.impl;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
+import com.github.eriksen.seckilling.dto.ProductInventoryDto;
 import com.github.eriksen.seckilling.model.Product;
 import com.github.eriksen.seckilling.peresistence.model.ProductCache;
 import com.github.eriksen.seckilling.peresistence.repository.ProductCacheRepo;
@@ -89,7 +87,27 @@ public class ProductSvcImpl implements ProductSvc {
     List<ProductInventoryStats> aggreRes = mongoTemplate.aggregate(pipeline, "product.inventory", ProductInventoryStats.class).getMappedResults();
     log.debug("[Result] " + aggreRes);
     for (ProductInventoryStats item : aggreRes) {
-      result.put(item.getId().toString(), item.getInventory());
+      result.put(item.getId(), item.getInventory());
+    }
+
+    return result;
+  }
+
+  @Override
+  public ProductInventoryDto getProductInventory(ObjectId id) {
+    Optional<ProductCache> productCache = productCacheRepo.findById(id.toString());
+    ProductInventoryDto result = new ProductInventoryDto();
+    if (productCache.isPresent()) {
+      result.setId(productCache.get().getId());
+      result.setInventory(productCache.get().getInventory());
+      return result;
+    }
+
+    Map<String, Integer> inventoryStats = this.getProductsInventory(Collections.singletonList(id));
+    // inventoryStats.size == 1
+    for (Map.Entry<String, Integer> entry : inventoryStats.entrySet()) {
+      result.setId(entry.getKey());
+      result.setInventory(entry.getValue());
     }
 
     return result;
