@@ -1,29 +1,25 @@
 package com.github.eriksen.seckilling.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.annotation.Resource;
 
 import com.github.eriksen.seckilling.dto.ActivityInitBody;
+import com.github.eriksen.seckilling.dto.SeckillOrderBody;
 import com.github.eriksen.seckilling.messages.KafkaSender;
-import com.github.eriksen.seckilling.model.Activity;
-import com.github.eriksen.seckilling.model.Product;
-import com.github.eriksen.seckilling.model.ProductInventory;
+import com.github.eriksen.seckilling.model.*;
 import com.github.eriksen.seckilling.peresistence.model.ActivityCache;
 import com.github.eriksen.seckilling.peresistence.model.ProductCache;
 import com.github.eriksen.seckilling.peresistence.repository.ActivityCacheRepo;
 import com.github.eriksen.seckilling.peresistence.repository.ProductCacheRepo;
-import com.github.eriksen.seckilling.repository.ActivityRepo;
-import com.github.eriksen.seckilling.repository.ProductInventoryRepo;
-import com.github.eriksen.seckilling.repository.ProductRepo;
+import com.github.eriksen.seckilling.repository.*;
 import com.github.eriksen.seckilling.service.ProductSvc;
 import com.github.eriksen.seckilling.service.SeckillSvc;
 import com.github.eriksen.seckilling.utils.CustomException;
 import com.github.eriksen.seckilling.utils.InventoryConst;
 import com.github.eriksen.seckilling.utils.MQConst;
 
+import com.github.eriksen.seckilling.utils.OrderConst;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.eclipse.jetty.http.HttpStatus;
@@ -54,6 +50,10 @@ public class SeckillSvcImpl implements SeckillSvc {
   private ProductRepo productRepo;
   @Autowired
   private ProductCacheRepo productCacheRepo;
+  @Autowired
+  private OrderRepo orderRepo;
+  @Autowired
+  private OrderDetailRepo orderDetailRepo;
 
   @Override
   public Activity createSeckillActivity(ActivityInitBody body) throws CustomException {
@@ -126,5 +126,66 @@ public class SeckillSvcImpl implements SeckillSvc {
     productCacheRepo.saveAll(productCaches); // cache product info
 
     return true;
+  }
+
+  @Override
+  public Order createSeckillOrder(String activityId, SeckillOrderBody.Product[] products, String userId) throws RuntimeException {
+    Order order = null;
+
+    try {
+      int totalPrice = 0;
+      List<Product> snapshots = new ArrayList<>();
+      for (SeckillOrderBody.Product product : products) {
+        Optional<ProductCache> productCache = productCacheRepo.findById(product.getId());
+        if (!productCache.isPresent()) {
+          throw new CustomException(
+              "E_SECKILL_ORDER_SVC_154",
+              HttpStatus.NOT_FOUND_404,
+              "商品信息不存在"
+          );
+        }
+
+        snapshots.add(productCache.get().getProduct());
+        totalPrice += productCache.get().getProduct().getPrice() * product.getCount();
+      }
+
+
+      Order orderPayload = new Order();
+      orderPayload.setAId(new ObjectId(activityId));
+      orderPayload.setUId(new ObjectId(userId));
+      orderPayload.setStatus(OrderConst.OrderStatus.NEW);
+      orderPayload.setTotalPrice(totalPrice);
+
+      order = orderRepo.insert(orderPayload);
+
+      List<OrderDetail> orderDetailPayloads = new ArrayList<>();
+      for (int i = 0; i < products.length; i++) {
+        OrderDetail detail = new OrderDetail();
+        detail.setOId(new ObjectId(order.getId()));
+        detail.setPId(new ObjectId(products[i].getId()));
+        detail.setCount(products[i].getCount());
+        detail.setProductSnapshot(snapshots.get(i));
+
+        orderDetailPayloads.add(detail);
+      }
+
+      orderDetailRepo.insert(orderDetailPayloads);
+
+      return order;
+    } catch (Throwable e) {
+      log.error("[Exit](error) " + e.getMessage());
+      if (!(e instanceof CustomException)) {
+        e.printStackTrace();
+      }
+
+      // rollback : cancel order
+      if (order != null) {
+        order.setStatus(OrderConst.OrderStatus.CANCELLED);
+        order.setLastModTime(new Date());
+        orderRepo.save(order);
+      }
+
+      throw e;
+    }
   }
 }
