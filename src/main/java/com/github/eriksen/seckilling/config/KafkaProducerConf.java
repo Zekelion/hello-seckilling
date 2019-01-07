@@ -12,6 +12,8 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+import reactor.kafka.sender.KafkaSender;
+import reactor.kafka.sender.SenderOptions;
 
 /**
  * KafkaConf
@@ -46,5 +48,11 @@ public class KafkaProducerConf {
   @Bean
   public KafkaTemplate<String, Object> kafkaTemplate() {
     return new KafkaTemplate<>(producerFactory());
+  }
+
+  @Bean
+  public KafkaSender<String, Object> kafkaSender() {
+    SenderOptions<String, Object> options = SenderOptions.<String, Object>create(producerConf()).maxInFlight(1024);
+    return KafkaSender.create(options);
   }
 }

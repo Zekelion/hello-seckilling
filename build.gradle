@@ -37,6 +37,7 @@ dependencies {
 	compile("com.alibaba:fastjson:1.2.54")
 	compileOnly('org.projectlombok:lombok')
 	compile('org.apache.commons:commons-lang3:3.8.1')
+	compile('io.projectreactor.kafka:reactor-kafka:1.1.0.RELEASE')
 
 	testImplementation('org.springframework.boot:spring-boot-starter-test')
 	testImplementation('org.springframework.kafka:spring-kafka-test')

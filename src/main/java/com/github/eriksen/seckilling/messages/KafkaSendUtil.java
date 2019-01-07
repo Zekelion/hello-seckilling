@@ -8,12 +8,12 @@ import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 
 /**
- * KafkaSender
+ * KafkaSendUtil
  */
 @Component
-public class KafkaSender {
+public class KafkaSendUtil {
 
-  private static Logger logger = LoggerFactory.getLogger(KafkaSender.class);
+  private static Logger logger = LoggerFactory.getLogger(KafkaSendUtil.class);
 
   @Autowired
   private KafkaTemplate<String, Object> kafkaTemplate;

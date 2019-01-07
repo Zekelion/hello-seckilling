@@ -6,7 +6,7 @@ import javax.annotation.Resource;
 
 import com.github.eriksen.seckilling.dto.ActivityInitBody;
 import com.github.eriksen.seckilling.dto.SeckillOrderBody;
-import com.github.eriksen.seckilling.messages.KafkaSender;
+import com.github.eriksen.seckilling.messages.KafkaSendUtil;
 import com.github.eriksen.seckilling.model.*;
 import com.github.eriksen.seckilling.peresistence.model.ActivityCache;
 import com.github.eriksen.seckilling.peresistence.model.ProductCache;
@@ -21,6 +21,7 @@ import com.github.eriksen.seckilling.utils.MQConst;
 
 import com.github.eriksen.seckilling.utils.OrderConst;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.bson.types.ObjectId;
 import org.eclipse.jetty.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.kafka.sender.KafkaSender;
+import reactor.kafka.sender.SenderRecord;
 
 /**
  * SeckillSvcImpl
@@ -41,7 +45,7 @@ public class SeckillSvcImpl implements SeckillSvc {
   @Resource
   private ProductSvc productSvc;
   @Autowired
-  private KafkaSender kafkaSender;
+  private KafkaSendUtil kafkaSendUtil;
   @Autowired
   private ProductInventoryRepo productInventoryRepo;
   @Autowired
@@ -54,6 +58,8 @@ public class SeckillSvcImpl implements SeckillSvc {
   private OrderRepo orderRepo;
   @Autowired
   private OrderDetailRepo orderDetailRepo;
+  @Autowired
+  private KafkaSender<String, Object> kafkaSender;
 
   @Override
   public Activity createSeckillActivity(ActivityInitBody body) throws CustomException {
@@ -86,7 +92,7 @@ public class SeckillSvcImpl implements SeckillSvc {
     Activity result = activityRepo.save(activity);
 
     // send activity info to mq
-    kafkaSender.sendToKafka(MQConst.SECKILL_ACTIVITY_TOPIC, result);
+    kafkaSendUtil.sendToKafka(MQConst.SECKILL_ACTIVITY_TOPIC, result);
 
     return result;
   }
@@ -170,6 +176,16 @@ public class SeckillSvcImpl implements SeckillSvc {
       }
 
       orderDetailRepo.insert(orderDetailPayloads);
+
+      Flux<SenderRecord<String, Object, Integer>> senderRecordFlux = Flux.just(SenderRecord.create(
+          new ProducerRecord<String, Object>(MQConst.SECKILL_ORDER_CREATE_TOPIC, null, order),
+          null
+      ));
+      kafkaSender.send(senderRecordFlux)
+          .then()
+          .doOnSuccess(s -> log.debug("Msg" + s))
+          .doOnError(e -> log.error("Error " + e))
+          .subscribe();
 
       return order;
     } catch (Throwable e) {

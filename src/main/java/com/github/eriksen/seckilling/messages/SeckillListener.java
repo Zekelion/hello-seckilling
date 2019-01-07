@@ -1,6 +1,7 @@
 package com.github.eriksen.seckilling.messages;
 
 import com.github.eriksen.seckilling.model.Activity;
+import com.github.eriksen.seckilling.model.Order;
 import com.github.eriksen.seckilling.service.SeckillSvc;
 import com.github.eriksen.seckilling.utils.MQConst;
 
@@ -32,5 +33,10 @@ public class SeckillListener {
       log.error("[Error] failed to preheat, due to " + e.getMessage());
       e.printStackTrace();
     }
+  }
+
+  @KafkaListener(topics = MQConst.SECKILL_ORDER_CREATE_TOPIC, groupId = MQConst.SECKILL_CONSUMER_GROUP)
+  public void onOrderCreated(Order order) {
+    log.debug("[OnOrderCreated]", order);
   }
 }
